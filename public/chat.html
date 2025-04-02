@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+    <h2>Chat online</h2>
+    <div>
+        <ul id="messages"></ul>
+
+        <input type="text" id="input" placeholder="Digite sua mensagem aqui" autocomplete="off">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+</body>
+
+<script>
+
+    const socket = io()
+    const messages = document.getElementById('messages')
+    const input = document.getElementById('input')
+    const username = localStorage.getItem('chatUsername') || 'Anônimo'
+
+    socket.emit("register", username)
+
+    socket.on("chat message", function(dados) {
+        const li = document.createElement('li')
+        li.textContent = `${dados.username}: ${dados.msg}`
+        messages.appendChild(li)
+    })
+
+    socket.on("user join", function(user){
+        const li = document.createElement('li')
+        li.textContent = `${user} entrou no chat`
+        li.style.color = 'green'
+        messages.appendChild(li)
+    })
+
+    socket.on("user left", function(user){
+        const li = document.createElement('li')
+        li.textContent = `${user} saiu do chat`
+        li.style.color = 'red'
+        messages.appendChild(li)
+    })
+    
+    function sendMessage() {
+        const message = input.value
+        socket.emit("chat message", message)
+        input.value = ""
+    }
+
+</script>
+
+</html>
